@@ -1,0 +1,46 @@
+{
+  "gallery": [
+    {
+      "id": "photo-1",
+      "src": "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1400&q=80",
+      "alt": "Celebration table in warm evening light"
+    },
+    {
+      "id": "photo-2",
+      "src": "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1000&q=80",
+      "alt": "People sharing a memorable moment"
+    },
+    {
+      "id": "photo-3",
+      "src": "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=1000&q=80",
+      "alt": "Elegant event reception"
+    }
+  ],
+  "music": {
+    "title": "Our song",
+    "artist": "Instrumental",
+    "src": ""
+  },
+  "schedule": [
+    {
+      "time": "16:00",
+      "title": "Welcome"
+    },
+    {
+      "time": "17:00",
+      "title": "Ceremony"
+    },
+    {
+      "time": "18:00",
+      "title": "Dinner"
+    },
+    {
+      "time": "21:00",
+      "title": "First dance"
+    },
+    {
+      "time": "23:00",
+      "title": "Closing"
+    }
+  ]
+}

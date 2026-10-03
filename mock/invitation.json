@@ -1,0 +1,24 @@
+{
+  "couple": {
+    "groom": {
+      "name": "Davlat"
+    },
+    "bride": {
+      "name": "Yasmina"
+    }
+  },
+  "event": {
+    "type": "wedding",
+    "title": "Our wedding day",
+    "date": "2026-10-12T16:00:00+05:00",
+    "time": "16:00"
+  },
+  "venue": {
+    "name": "Garden Palace",
+    "address": "Tashkent, Uzbekistan",
+    "latitude": 41.311081,
+    "longitude": 69.240562
+  },
+  "story": "Two paths became one, and we would love you to be part of the next chapter.",
+  "dressCode": "Warm neutrals · elegant evening"
+}
