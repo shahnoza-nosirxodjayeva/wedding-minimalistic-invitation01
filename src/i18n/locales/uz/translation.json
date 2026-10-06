@@ -1,1 +1,63 @@
-{"hero":{"invited":"Sizni to'yimizga taklif qilamiz","eyebrow":"12 OKTABR · TOSHKENT","subtitle":"Hayotimizdagi eng muhim kunni siz bilan baham ko‘rishni istaymiz.","date":"12 OKTABR 2026","scroll":"Pastga tushing"},"countdown":{"label":"To‘y kunigacha","days":"kun","hours":"soat","minutes":"daqiqa","seconds":"soniya","note":"Sizni intiqlik bilan kutamiz"},"story":{"label":"Bizning hikoyamiz","title":"Ikki yo‘l, bitta hikoya.","copy":"Sevgi, ishonch va birga tanlangan kelajak haqida.","note":"Ikki qalb. Bir yo‘l. Abadiy."},"schedule":{"label":"Kun dasturi","ceremony":"Nikoh marosimi","reception":"Kutib olish","dinner":"Kechki ziyofat","dance":"Bayramona raqs","detail":"Garden Palace"},"venue":{"label":"Manzil","maps":"Google xaritada ochish","coordinates":"Koordinatalar"},"rsvp":{"title":"Sizni kutamiz","name":"Ismingiz","attendance":"Qatnashasizmi?","yes":"Ha, mamnuniyat bilan","no":"Afsuski, yo‘q","submit":"Javobni yuborish","success":"Rahmat! Javobingiz qabul qilindi."},"nav":{"story":"Hikoya","schedule":"Dastur","location":"Manzil"}}
+{
+  "hero": {
+    "invited": "Sizni to‘yimizga taklif qilamiz",
+    "eyebrow": "12 OKTABR · TOSHKENT",
+    "subtitle": "Hayotimizdagi eng muhim kunni siz bilan baham ko‘rishni istaymiz.",
+    "date": "12 OKTABR 2026",
+    "scroll": "Pastga tushing"
+  },
+  "guest": {
+    "dear": "Hurmatli {{name}}"
+  },
+  "countdown": {
+    "label": "To‘y kunigacha",
+    "days": "kun",
+    "hours": "soat",
+    "minutes": "daqiqa",
+    "seconds": "soniya",
+    "note": "Sizni intiqlik bilan kutamiz"
+  },
+  "story": {
+    "label": "Bizning hikoyamiz",
+    "title": "Ikki yo‘l, bitta hikoya.",
+    "copy": "Sevgi, ishonch va birga tanlangan kelajak haqida.",
+    "note": "Ikki qalb. Bir yo‘l. Abadiy."
+  },
+  "schedule": {
+    "label": "Kun dasturi",
+    "ceremony": "Nikoh marosimi",
+    "reception": "Kutib olish",
+    "dinner": "Kechki ziyofat",
+    "dance": "Bayramona raqs",
+    "detail": "Garden Palace"
+  },
+  "gallery": {
+    "label": "Galereya",
+    "title": "Bizning unutilmas onlarimiz",
+    "previous": "Oldingi surat",
+    "next": "Keyingi surat"
+  },
+  "venue": {
+    "label": "Manzil",
+    "maps": "Google xaritada ochish",
+    "coordinates": "Koordinatalar",
+    "date": "Sana va vaqt",
+    "dressCode": "Dress-kod",
+    "mapEyebrow": "Uchrashuv nuqtasi"
+  },
+  "rsvp": {
+    "title": "Sizni kutamiz",
+    "name": "Ismingiz",
+    "attendance": "Qatnashasizmi?",
+    "yes": "Ha, mamnuniyat bilan",
+    "no": "Afsuski, yo‘q",
+    "submit": "Javobni yuborish",
+    "success": "Rahmat! Javobingiz qabul qilindi."
+  },
+  "nav": {
+    "story": "Hikoya",
+    "schedule": "Dastur",
+    "gallery": "Galereya",
+    "location": "Manzil"
+  }
+}

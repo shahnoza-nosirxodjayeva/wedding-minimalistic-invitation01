@@ -1,31 +1,86 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useInvitation, useTranslation } from '@envitepkg/template-sdk/react';
+import { useGuest, useInvitation, useTranslation } from '@envitepkg/template-sdk/react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { SqueezeCarousel } from './components/squeeze-carousel';
+
+type RevealSectionProps = {
+  children: React.ReactNode;
+  className: string;
+  id?: string;
+  delay?: number;
+};
+
+function RevealSection({ children, className, id, delay = 0 }: RevealSectionProps) {
+  const reducedMotion = useReducedMotion();
+
+  return <motion.section
+    id={id}
+    className={`${className} scroll-reveal`}
+    initial={reducedMotion ? false : { opacity: 0, y: 96, scale: 0.985 }}
+    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+    viewport={{ once: true, amount: 0.14 }}
+    transition={{ duration: reducedMotion ? 0 : 0.95, delay, ease: [0.16, 1, 0.3, 1] }}
+  >
+    {children}
+  </motion.section>;
+}
 
 function useCountdown(date: string) {
   const calculate = () => {
     const difference = Math.max(0, new Date(date).getTime() - Date.now());
-    return { days: Math.floor(difference / 86400000), hours: Math.floor(difference / 3600000) % 24, minutes: Math.floor(difference / 60000) % 60, seconds: Math.floor(difference / 1000) % 60 };
+    return {
+      days: Math.floor(difference / 86400000),
+      hours: Math.floor(difference / 3600000) % 24,
+      minutes: Math.floor(difference / 60000) % 60,
+      seconds: Math.floor(difference / 1000) % 60,
+    };
   };
   const [value, setValue] = useState(calculate);
-  useEffect(() => { const timer = setInterval(() => setValue(calculate()), 1000); return () => clearInterval(timer); }, [date]);
+  useEffect(() => {
+    const timer = setInterval(() => setValue(calculate()), 1000);
+    return () => clearInterval(timer);
+  }, [date]);
   return value;
 }
 
 export function Template() {
   const invitation = useInvitation();
+  const guest = useGuest() ?? invitation.guests[0] ?? null;
+  const reducedMotion = useReducedMotion();
   const { t, language, setLanguage, supportedLanguages } = useTranslation();
   const { groom, bride } = invitation.couple;
   const countdown = useCountdown(invitation.event.date);
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
-  const date = new Intl.DateTimeFormat(language === 'ru' ? 'ru-RU' : language === 'en' ? 'en-GB' : 'uz-UZ', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(invitation.event.date));
-  const mapLink = useMemo(() => invitation.venue.latitude == null ? 'https://maps.google.com' : `https://www.google.com/maps?q=${invitation.venue.latitude},${invitation.venue.longitude}`, [invitation.venue]);
-  const schedule = invitation.schedule ?? [
-    { time: '16:00', title: t('schedule.ceremony') }, { time: '17:00', title: t('schedule.reception') },
-    { time: '19:00', title: t('schedule.dinner') }, { time: '22:00', title: t('schedule.dance') },
+  const locale = language === 'ru' ? 'ru-RU' : language === 'en' ? 'en-GB' : 'uz-UZ';
+  const date = new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(invitation.event.date));
+  const mapLink = useMemo(
+    () => invitation.venue.latitude == null
+      ? 'https://maps.google.com'
+      : `https://www.google.com/maps?q=${invitation.venue.latitude},${invitation.venue.longitude}`,
+    [invitation.venue.latitude, invitation.venue.longitude],
+  );
+  const schedule = invitation.schedule.length ? invitation.schedule : [
+    { time: '16:00', title: t('schedule.ceremony') },
+    { time: '17:00', title: t('schedule.reception') },
+    { time: '19:00', title: t('schedule.dinner') },
+    { time: '22:00', title: t('schedule.dance') },
   ];
-  const nav = [{ id: 'story', label: t('nav.story') }, { id: 'schedule', label: t('nav.schedule') }, { id: 'location', label: t('nav.location') }, { id: 'rsvp', label: 'RSVP' }];
-  const go = (id: string) => { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); setMenuOpen(false); };
+  const nav = [
+    { id: 'story', label: t('nav.story') },
+    { id: 'schedule', label: t('nav.schedule') },
+    ...(invitation.gallery.length ? [{ id: 'gallery', label: t('nav.gallery') }] : []),
+    { id: 'location', label: t('nav.location') },
+    { id: 'rsvp', label: 'RSVP' },
+  ];
+  const go = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    setMenuOpen(false);
+  };
 
   return <main className="invitation">
     <section className="hero" id="home">
@@ -39,19 +94,90 @@ export function Template() {
       </header>
       {menuOpen && <nav className="mobile-nav">{nav.map(item => <button key={item.id} onClick={() => go(item.id)}>{item.label}</button>)}</nav>}
       <div className="hero-grid">
-        <div className="hero-copy"><p className="eyebrow">{t('hero.invited')}</p><p className="eyebrow subtle">{invitation.event.title}</p><h1>{groom.name}<em>&amp;</em>{bride.name}</h1><p className="hero-date">{date}<br />{invitation.event.time}</p><p className="hero-place">{invitation.venue.name}<br />{invitation.venue.address}</p></div>
-        <div className="hero-art"><span className="art-d">{groom.name[0]}</span><span className="art-y">{bride.name[0]}</span><span className="art-line" /><span className="art-date">{new Date(invitation.event.date).toLocaleDateString(language)}</span><span className="ring ring-one" /><span className="ring ring-two" /></div>
+        <div className="hero-copy">
+          {guest && <p className="guest-name">{t('guest.dear', { name: guest.name })}</p>}
+          <p className="eyebrow">{t('hero.invited')}</p>
+          <p className="eyebrow subtle">{invitation.event.title}</p>
+          <h1>{groom.name}<em>&amp;</em>{bride.name}</h1>
+          <p className="hero-date">{date}<br />{invitation.event.time}</p>
+          <p className="hero-place">{invitation.venue.name}<br />{invitation.venue.address}</p>
+        </div>
+        <div className="hero-art">
+          <span className="art-d">{groom.name[0]}</span><span className="art-y">{bride.name[0]}</span><span className="art-line" />
+          <span className="art-date">{new Date(invitation.event.date).toLocaleDateString(locale)}</span><span className="ring ring-one" /><span className="ring ring-two" />
+        </div>
       </div>
       <button className="scroll-cue" onClick={() => go('countdown')}><span />{t('hero.scroll')}</button>
     </section>
-    <section className="countdown-section" id="countdown"><p className="side-label">{t('countdown.label')}</p><div className="countdown">{Object.entries(countdown).map(([key, value]) => <div key={key}><strong>{String(value).padStart(2, '0')}</strong><span>{t(`countdown.${key}`)}</span></div>)}</div><p className="countdown-note">{t('countdown.note')}</p></section>
-    <section className="schedule-section" id="schedule"><div className="section-title"><p>{t('schedule.label')}</p><span /></div><ol>{schedule.map(item => <li key={item.time}><time>{item.time}</time><span className="dash" /><div><strong>{item.title}</strong><small>{invitation.event.type}</small></div></li>)}</ol><div className="schedule-photo"><div>{groom.name[0]}{bride.name[0]}</div></div></section>
-    <section className="story-section" id="story"><div className="story-photo"><span>{groom.name[0]}<br />{bride.name[0]}</span></div><div className="story-copy"><p className="eyebrow">{t('story.label')}</p><blockquote>{t('story.title')}</blockquote><p>{invitation.story || t('story.copy')}</p><span className="small-line" /><small>{invitation.dressCode || t('story.note')}</small></div></section>
-    {invitation.gallery.length > 0 && <section className="gallery-section">{invitation.gallery.slice(0, 3).map(image => <img key={image.id} src={image.src} alt={image.alt || ''} loading="lazy" />)}</section>}
-    <section className="location-section" id="location"><div><p className="section-kicker">{t('venue.label')}</p><h2>{invitation.venue.name}</h2><p>{invitation.venue.address}</p><p className="dress-code">{invitation.dressCode}</p><a href={mapLink} target="_blank" rel="noreferrer">{t('venue.maps')} <b>↗</b></a></div><div className="location-card"><div className="location-sun" /><span>{t('venue.coordinates')}<br />{invitation.venue.latitude}° N &nbsp; {invitation.venue.longitude}° E</span></div></section>
-    {invitation.music && <section className="music-section"><span>♫</span><p>{invitation.music.title}<small>{invitation.music.artist}</small></p><audio controls preload="none" src={invitation.music.src} /></section>}
-    <section className="rsvp-section" id="rsvp"><p className="section-kicker">RSVP</p><div className="rsvp-layout"><h2>{t('rsvp.title')}</h2>{confirmed ? <p className="thanks">{t('rsvp.success')}</p> : <form onSubmit={event => { event.preventDefault(); setConfirmed(true); }}><label>{t('rsvp.name')}<input required /></label><label>{t('rsvp.attendance')}<select><option>{t('rsvp.yes')}</option><option>{t('rsvp.no')}</option></select></label><button type="submit">{t('rsvp.submit')}</button></form>}</div></section>
-    {invitation.wishes.length > 0 && <section className="wishes-section">{invitation.wishes.slice(0, 2).map(wish => <blockquote key={wish.id}>“{wish.message}”<footer>{wish.guest}</footer></blockquote>)}</section>}
-    <footer><button className="monogram" onClick={() => go('home')}>{groom.name[0]}<span>{bride.name[0]}</span></button><span>{groom.name} &amp; {bride.name}</span><span>{date}</span><span className="footer-heart">♡</span></footer>
+
+    <RevealSection className="countdown-section" id="countdown">
+      <p className="side-label">{t('countdown.label')}</p>
+      <div className="countdown">{Object.entries(countdown).map(([key, value]) => <div key={key}><strong>{String(value).padStart(2, '0')}</strong><span>{t(`countdown.${key}`)}</span></div>)}</div>
+      <p className="countdown-note">{t('countdown.note')}</p>
+    </RevealSection>
+
+    <RevealSection className="schedule-section" id="schedule">
+      <div className="section-title"><p>{t('schedule.label')}</p><span /></div>
+      <ol>{schedule.map((item, index) => <li key={`${item.time}-${index}`}><time>{item.time}</time><span className="dash" /><div><strong>{item.title}</strong><small>{item.description || invitation.event.type}</small></div></li>)}</ol>
+      <div className="schedule-photo"><div>{groom.name[0]}{bride.name[0]}</div></div>
+    </RevealSection>
+
+    <RevealSection className="story-section" id="story">
+      <div className="story-photo"><span>{groom.name[0]}<br />{bride.name[0]}</span></div>
+      <div className="story-copy"><p className="eyebrow">{t('story.label')}</p><blockquote>{t('story.title')}</blockquote><p>{invitation.story || t('story.copy')}</p><span className="small-line" /><small>{invitation.dressCode || t('story.note')}</small></div>
+    </RevealSection>
+
+    {invitation.gallery.length > 0 && <RevealSection className="gallery-section" id="gallery">
+      <div className="gallery-heading"><p className="section-kicker">{t('gallery.label')}</p><h2>{t('gallery.title')}</h2></div>
+      <SqueezeCarousel slides={invitation.gallery} label={t('gallery.label')} previousLabel={t('gallery.previous')} nextLabel={t('gallery.next')} />
+    </RevealSection>}
+
+    <RevealSection className="location-section" id="location">
+      <motion.div
+        className="location-copy"
+        initial={reducedMotion ? false : { opacity: 0, y: 42 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.4 }}
+        transition={{ duration: reducedMotion ? 0 : 0.8, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <div className="location-heading"><span>05</span><p className="section-kicker">{t('venue.label')}</p></div>
+        <p className="location-event">{invitation.event.title} · {invitation.event.type}</p>
+        <h2>{invitation.venue.name}</h2>
+        <p className="location-address">{invitation.venue.address}</p>
+        <div className="location-meta">
+          <div><span>{t('venue.date')}</span><strong>{date}</strong><small>{invitation.event.time}</small></div>
+          <div><span>{t('venue.dressCode')}</span><strong>{invitation.dressCode || '—'}</strong></div>
+        </div>
+        <a className="location-link" href={mapLink} target="_blank" rel="noreferrer"><span>{t('venue.maps')}</span><b aria-hidden="true">↗</b></a>
+      </motion.div>
+
+      <motion.div
+        className="location-map"
+        initial={reducedMotion ? false : { opacity: 0, y: 64, rotate: 1.5 }}
+        whileInView={{ opacity: 1, y: 0, rotate: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: reducedMotion ? 0 : 1.05, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <span className="location-map__stamp">{t('venue.mapEyebrow')}</span>
+        <svg className="location-map__roads" viewBox="0 0 800 520" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M-40 410 C130 290 215 480 390 350 S655 170 840 250" />
+          <path d="M180 -40 C285 110 150 220 280 330 S540 425 500 570" />
+          <path d="M-30 120 C150 185 300 70 470 135 S690 170 840 65" />
+          <path className="major-road" d="M-50 485 C210 370 330 420 510 270 S690 105 850 145" />
+        </svg>
+        <span className="location-map__district district-one" aria-hidden="true" />
+        <span className="location-map__district district-two" aria-hidden="true" />
+        <span className="location-map__district district-three" aria-hidden="true" />
+        <div className="location-pin"><i /><span>{invitation.venue.name}</span></div>
+        <p className="location-coordinates"><span>{t('venue.coordinates')}</span>{invitation.venue.latitude}° N<br />{invitation.venue.longitude}° E</p>
+      </motion.div>
+    </RevealSection>
+
+    {invitation.music && <RevealSection className="music-section"><span>♫</span><p>{invitation.music.title}<small>{invitation.music.artist}</small></p>{invitation.music.src && <audio controls preload="none" src={invitation.music.src} />}</RevealSection>}
+
+    <RevealSection className="rsvp-section" id="rsvp"><p className="section-kicker">RSVP</p><div className="rsvp-layout"><h2>{t('rsvp.title')}</h2>{confirmed ? <p className="thanks">{t('rsvp.success')}</p> : <form onSubmit={event => { event.preventDefault(); setConfirmed(true); }}><label>{t('rsvp.name')}<input required defaultValue={guest?.name || ''} /></label><label>{t('rsvp.attendance')}<select><option>{t('rsvp.yes')}</option><option>{t('rsvp.no')}</option></select></label><button type="submit">{t('rsvp.submit')}</button></form>}</div></RevealSection>
+
+    {invitation.wishes.length > 0 && <RevealSection className="wishes-section">{invitation.wishes.slice(0, 2).map(wish => <blockquote key={wish.id}>“{wish.message}”<footer>{wish.guest}</footer></blockquote>)}</RevealSection>}
+    <motion.footer initial={reducedMotion ? false : { opacity: 0, y: 48 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: reducedMotion ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}><button className="monogram" onClick={() => go('home')}>{groom.name[0]}<span>{bride.name[0]}</span></button><span>{groom.name} &amp; {bride.name}</span><span>{date}</span><span className="footer-heart">♡</span></motion.footer>
   </main>;
 }
