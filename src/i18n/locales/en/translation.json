@@ -45,6 +45,15 @@
     "dressCode": "Dress code",
     "mapEyebrow": "Meeting point"
   },
+  "music": {
+    "label": "Our song",
+    "play": "Play music",
+    "pause": "Pause music",
+    "seek": "Song progress",
+    "mute": "Mute music",
+    "unmute": "Unmute music",
+    "unavailable": "Add an audio file to play this song"
+  },
   "rsvp": {
     "title": "We hope you can join us",
     "name": "Your name",

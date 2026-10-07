@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useGuest, useInvitation, useTranslation } from '@envitepkg/template-sdk/react';
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { MusicPlayer } from './components/music-player';
 import { SqueezeCarousel } from './components/squeeze-carousel';
 
 type RevealSectionProps = {
@@ -13,16 +14,17 @@ type RevealSectionProps = {
 function RevealSection({ children, className, id, delay = 0 }: RevealSectionProps) {
   const reducedMotion = useReducedMotion();
 
-  return <motion.section
-    id={id}
-    className={`${className} scroll-reveal`}
-    initial={reducedMotion ? false : { opacity: 0, y: 96, scale: 0.985 }}
-    whileInView={{ opacity: 1, y: 0, scale: 1 }}
-    viewport={{ once: true, amount: 0.14 }}
-    transition={{ duration: reducedMotion ? 0 : 0.95, delay, ease: [0.16, 1, 0.3, 1] }}
-  >
-    {children}
-  </motion.section>;
+  return <section id={id} className={className}>
+    <motion.div
+      className="section-container scroll-reveal"
+      initial={reducedMotion ? false : { opacity: 0, y: 72, scale: 0.99 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.14 }}
+      transition={{ duration: reducedMotion ? 0 : 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
+    >
+      {children}
+    </motion.div>
+  </section>;
 }
 
 function useCountdown(date: string) {
@@ -138,18 +140,12 @@ export function Template() {
     </RevealSection>
 
     {invitation.gallery.length > 0 && <RevealSection className="gallery-section" id="gallery">
-      <div className="gallery-heading"><p className="section-kicker">{t('gallery.label')}</p><h2>{t('gallery.title')}</h2></div>
+      <div className="gallery-heading"><h2>{t('gallery.title')}</h2></div>
       <SqueezeCarousel slides={invitation.gallery} label={t('gallery.label')} previousLabel={t('gallery.previous')} nextLabel={t('gallery.next')} />
     </RevealSection>}
 
     <RevealSection className="location-section" id="location">
-      <motion.div
-        className="location-copy"
-        initial={reducedMotion ? false : { opacity: 0, y: 42 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.4 }}
-        transition={{ duration: reducedMotion ? 0 : 0.8, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
-      >
+      <div className="location-copy">
         <div className="location-heading"><span>05</span><p className="section-kicker">{t('venue.label')}</p></div>
         <p className="location-event">{invitation.event.title} · {invitation.event.type}</p>
         <h2>{invitation.venue.name}</h2>
@@ -159,15 +155,9 @@ export function Template() {
           <div><span>{t('venue.dressCode')}</span><strong>{invitation.dressCode || '—'}</strong></div>
         </div>
         <a className="location-link" href={mapLink} target="_blank" rel="noreferrer"><span>{t('venue.maps')}</span><b aria-hidden="true">↗</b></a>
-      </motion.div>
+      </div>
 
-      <motion.div
-        className="location-map"
-        initial={reducedMotion ? false : { opacity: 0, y: 64, rotate: 1.5 }}
-        whileInView={{ opacity: 1, y: 0, rotate: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: reducedMotion ? 0 : 1.05, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
-      >
+      <div className="location-map">
         <span className="location-map__stamp">{t('venue.mapEyebrow')}</span>
         <svg className="location-map__roads" viewBox="0 0 800 520" preserveAspectRatio="none" aria-hidden="true">
           <path d="M-40 410 C130 290 215 480 390 350 S655 170 840 250" />
@@ -180,10 +170,23 @@ export function Template() {
         <span className="location-map__district district-three" aria-hidden="true" />
         <div className="location-pin"><i /><span>{invitation.venue.name}</span></div>
         <p className="location-coordinates"><span>{t('venue.coordinates')}</span>{invitation.venue.latitude}° N<br />{invitation.venue.longitude}° E</p>
-      </motion.div>
+      </div>
     </RevealSection>
 
-    {invitation.music && <RevealSection className="music-section"><span>♫</span><p>{invitation.music.title}<small>{invitation.music.artist}</small></p>{invitation.music.src && <audio controls preload="none" src={invitation.music.src} />}</RevealSection>}
+    {invitation.music && <RevealSection className="music-section">
+      <MusicPlayer
+        title={invitation.music.title}
+        artist={invitation.music.artist}
+        src={invitation.music.src}
+        label={t('music.label')}
+        playLabel={t('music.play')}
+        pauseLabel={t('music.pause')}
+        seekLabel={t('music.seek')}
+        muteLabel={t('music.mute')}
+        unmuteLabel={t('music.unmute')}
+        unavailableLabel={t('music.unavailable')}
+      />
+    </RevealSection>}
 
     <motion.footer initial={reducedMotion ? false : { opacity: 0, y: 48 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: reducedMotion ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}><button className="monogram" onClick={() => go('home')}>{groom.name[0]}<span>{bride.name[0]}</span></button><span>{groom.name} &amp; {bride.name}</span><span>{date}</span><span className="footer-heart">♡</span></motion.footer>
   </main>;

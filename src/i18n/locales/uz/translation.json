@@ -45,6 +45,15 @@
     "dressCode": "Dress-kod",
     "mapEyebrow": "Uchrashuv nuqtasi"
   },
+  "music": {
+    "label": "Bizning kuyimiz",
+    "play": "Musiqani qo‘yish",
+    "pause": "Musiqani pauza qilish",
+    "seek": "Qo‘shiq davomiyligi",
+    "mute": "Ovozni o‘chirish",
+    "unmute": "Ovozni yoqish",
+    "unavailable": "Bu kuyni ijro etish uchun audio fayl qo‘shing"
+  },
   "rsvp": {
     "title": "Sizni kutamiz",
     "name": "Ismingiz",
