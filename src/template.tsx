@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useGuest, useInvitation, useTranslation } from '@envitepkg/template-sdk/react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
 import { SqueezeCarousel } from './components/squeeze-carousel';
 
 type RevealSectionProps = {
@@ -47,11 +47,18 @@ export function Template() {
   const invitation = useInvitation();
   const guest = useGuest() ?? invitation.guests[0] ?? null;
   const reducedMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll();
+  const smoothScrollProgress = useSpring(scrollYProgress, {
+    stiffness: 110,
+    damping: 28,
+    mass: 0.25,
+  });
+  const heroY = useTransform(scrollYProgress, [0, 0.2], [0, -42]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.18], [1, 0.72]);
   const { t, language, setLanguage, supportedLanguages } = useTranslation();
   const { groom, bride } = invitation.couple;
   const countdown = useCountdown(invitation.event.date);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [confirmed, setConfirmed] = useState(false);
   const locale = language === 'ru' ? 'ru-RU' : language === 'en' ? 'en-GB' : 'uz-UZ';
   const date = new Intl.DateTimeFormat(locale, {
     day: 'numeric',
@@ -75,7 +82,6 @@ export function Template() {
     { id: 'schedule', label: t('nav.schedule') },
     ...(invitation.gallery.length ? [{ id: 'gallery', label: t('nav.gallery') }] : []),
     { id: 'location', label: t('nav.location') },
-    { id: 'rsvp', label: 'RSVP' },
   ];
   const go = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -83,6 +89,7 @@ export function Template() {
   };
 
   return <main className="invitation">
+    {!reducedMotion && <motion.div className="scroll-progress" style={{ scaleY: smoothScrollProgress }} aria-hidden="true" />}
     <section className="hero" id="home">
       <header className="topbar">
         <button className="monogram" onClick={() => go('home')}>{groom.name[0]}<span>{bride.name[0]}</span></button>
@@ -93,7 +100,10 @@ export function Template() {
         </div>
       </header>
       {menuOpen && <nav className="mobile-nav">{nav.map(item => <button key={item.id} onClick={() => go(item.id)}>{item.label}</button>)}</nav>}
-      <div className="hero-grid">
+      <motion.div
+        className="hero-grid"
+        style={reducedMotion ? undefined : { y: heroY, opacity: heroOpacity }}
+      >
         <div className="hero-copy">
           {guest && <p className="guest-name">{t('guest.dear', { name: guest.name })}</p>}
           <p className="eyebrow">{t('hero.invited')}</p>
@@ -106,7 +116,7 @@ export function Template() {
           <span className="art-d">{groom.name[0]}</span><span className="art-y">{bride.name[0]}</span><span className="art-line" />
           <span className="art-date">{new Date(invitation.event.date).toLocaleDateString(locale)}</span><span className="ring ring-one" /><span className="ring ring-two" />
         </div>
-      </div>
+      </motion.div>
       <button className="scroll-cue" onClick={() => go('countdown')}><span />{t('hero.scroll')}</button>
     </section>
 
@@ -175,9 +185,6 @@ export function Template() {
 
     {invitation.music && <RevealSection className="music-section"><span>♫</span><p>{invitation.music.title}<small>{invitation.music.artist}</small></p>{invitation.music.src && <audio controls preload="none" src={invitation.music.src} />}</RevealSection>}
 
-    <RevealSection className="rsvp-section" id="rsvp"><p className="section-kicker">RSVP</p><div className="rsvp-layout"><h2>{t('rsvp.title')}</h2>{confirmed ? <p className="thanks">{t('rsvp.success')}</p> : <form onSubmit={event => { event.preventDefault(); setConfirmed(true); }}><label>{t('rsvp.name')}<input required defaultValue={guest?.name || ''} /></label><label>{t('rsvp.attendance')}<select><option>{t('rsvp.yes')}</option><option>{t('rsvp.no')}</option></select></label><button type="submit">{t('rsvp.submit')}</button></form>}</div></RevealSection>
-
-    {invitation.wishes.length > 0 && <RevealSection className="wishes-section">{invitation.wishes.slice(0, 2).map(wish => <blockquote key={wish.id}>“{wish.message}”<footer>{wish.guest}</footer></blockquote>)}</RevealSection>}
     <motion.footer initial={reducedMotion ? false : { opacity: 0, y: 48 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: reducedMotion ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}><button className="monogram" onClick={() => go('home')}>{groom.name[0]}<span>{bride.name[0]}</span></button><span>{groom.name} &amp; {bride.name}</span><span>{date}</span><span className="footer-heart">♡</span></motion.footer>
   </main>;
 }
